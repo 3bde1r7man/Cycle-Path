@@ -32,10 +32,6 @@ notVisited(X, Y, Visited) :- \+ member([X, Y], Visited).
 % check if the cell has the same color
 sameColor(X, Y, Color, Board) :- nth0(X, Board, Row), nth0(Y, Row, Color).
 
-
-% check if the cell is in the cycle
-inCycle(X, Y, Cycle) :- member([X, Y], Cycle).
-
 % check if the last node is adjacent to the first node
 adjacent([X1, Y1], [X2, Y2]) :- 
     X1 =:= X2, abs(Y1 - Y2) =:= 1;
@@ -70,7 +66,6 @@ dfs(X, Y, X1, Y1, Visited, Color, Board, N, M) :-
     notVisited(X2, Y2, Visited),
     getColor(X, Y, Color, Board),
     getColor(X2, Y2, Color, Board),
-    \+ inCycle(X2, Y2, Visited),
     append(Visited, [[X2, Y2]], Visited1),
     dfs(X2, Y2, _, _, Visited1, Color, Board, N, M).
 
