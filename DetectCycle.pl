@@ -53,13 +53,13 @@ closedCycle(Cycle) :-
 getColor(X, Y, Color, Board) :- nth0(X, Board, Row), nth0(Y, Row, Color).
 
 % depth first search
-dfs(X, Y, X, Y, Visited, Color, Board, _, _) :- 
+dfs(_, _, Visited, Color, Board, _, _) :- 
     validCycle(Visited, Color, Board), 
     write('Cycle: '), write(Visited), write(' Color: '), write(Color), nl, 
     !.
 
 
-dfs(X, Y, X1, Y1, Visited, Color, Board, N, M) :- 
+dfs(X, Y, Visited, Color, Board, N, M) :- 
     move(X1, Y1),
     X2 is X + X1, Y2 is Y + Y1,
     inBoard(X2, Y2, N, M),
@@ -67,7 +67,7 @@ dfs(X, Y, X1, Y1, Visited, Color, Board, N, M) :-
     getColor(X, Y, Color, Board),
     getColor(X2, Y2, Color, Board),
     append(Visited, [[X2, Y2]], Visited1),
-    dfs(X2, Y2, _, _, Visited1, Color, Board, N, M).
+    dfs(X2, Y2, Visited1, Color, Board, N, M).
 
 
 start :-
@@ -76,7 +76,7 @@ start :-
     Board = [Row|_], length(Row, M), % number of columns
     (   between(0, N, X), % for each cell
         between(0, M, Y), 
-        dfs(X, Y, _, _, [[X, Y]], _, Board, N, M) -> 
+        dfs(X, Y, [[X, Y]], _, Board, N, M) -> 
         Found = true
     ;   Found = false
     ),
