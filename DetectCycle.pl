@@ -18,9 +18,9 @@ board1([
 
 % moves 
 move(0, 1). % right
-move(-1, 0). % down
+move(-1, 0). % up
 move(0, -1). % left
-move(1, 0). % up
+move(1, 0). % down
 
 
 % check if the cell is in the board
