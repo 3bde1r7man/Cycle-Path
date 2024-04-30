@@ -29,19 +29,15 @@ inBoard(X, Y, N, M) :- X >= 0, X < N, Y >= 0, Y < M.
 % check if the cell is not visited
 notVisited(X, Y, Visited) :- \+ member([X, Y], Visited).
 
-% check if the cell has the same color
-sameColor(X, Y, Color, Board) :- nth0(X, Board, Row), nth0(Y, Row, Color).
-
 % check if the last node is adjacent to the first node
 adjacent([X1, Y1], [X2, Y2]) :- 
     X1 =:= X2, abs(Y1 - Y2) =:= 1;
     Y1 =:= Y2, abs(X1 - X2) =:= 1.
 
 % check if the cycle is valid
-validCycle(Cycle, Color, Board) :- 
+validCycle(Cycle) :- 
     length(Cycle, L), L >= 4,
-    closedCycle(Cycle),
-    forall(member([X, Y], Cycle), sameColor(X, Y, Color, Board)).
+    closedCycle(Cycle).
 
 % check if the cycle is closed
 closedCycle(Cycle) :-
@@ -53,8 +49,8 @@ closedCycle(Cycle) :-
 getColor(X, Y, Color, Board) :- nth0(X, Board, Row), nth0(Y, Row, Color).
 
 % depth first search
-dfs(_, _, Visited, Color, Board, _, _) :- 
-    validCycle(Visited, Color, Board), 
+dfs(_, _, Visited, Color, _, _, _) :- 
+    validCycle(Visited), 
     write('Cycle: '), write(Visited), write(' Color: '), write(Color), nl, 
     !.
 
