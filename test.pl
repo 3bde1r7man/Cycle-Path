@@ -17,11 +17,10 @@ board1([
 ]).
 
 % moves 
-move(0, 1). % right
-move(-1, 0). % down
-move(0, -1). % left
-move(1, 0). % up
-
+move([0, 1]). % right
+move([1, 0]). % down
+move([0, -1]). % left
+move([-1, 0]). % up
 
 % check if the cell is in the board
 inBoard(X, Y, N, M) :- X >= 0, X < N, Y >= 0, Y < M.
@@ -70,11 +69,6 @@ dfs(X, Y, Visited, Color, Board, N, M) :-
     dfs(X2, Y2, Visited1, Color, Board, N, M).
 
 
-:- use_module(library(random)).
-
-random_number_less_than(Mx, RandomNumber) :-
-    M is Mx - 1,
-    random_between(0, M, RandomNumber).
 
 minV([], V, V). % Base case: when the list is empty, V is unified with the accumulator S
 
@@ -85,14 +79,22 @@ findMinIndex([H|T], Ind, V) :-
     minV(T, H, V),
     nth0(Ind, [H|T], V),!. % Find the index of the minimum value V in the List
 
-fill_list(N, Max, List) :-
-    length(List, N),
-    maplist(random_number_less_than(Max), List).
+% filling the 1d list with heuristic values using manhattan distance
+fill_1d_HL([], _, _, _, _, _, _, []).
+fill_1d_HL([_|Rest], X, Y, GoalX, GoalY, GoalColor, Board, [H|Rest1]) :-
+    (
+        \+ getColor(X, Y, GoalColor, Board)-> H = -1;
+        H is abs(X - GoalX) + abs(Y - GoalY)
+    ),
+    Y1 is Y + 1,
+    fill_1d_HL(Rest, X, Y1, GoalX, GoalY, GoalColor, Board, Rest1).
 
-% Fill a 2D list with dimensions N x M with random numbers between 0 and Max
-fill_2d_list(N, M, Max, Result) :-
-    length(Result, N),
-    maplist(fill_list(M, Max), Result).
+% filling the 2d list with heuristic values
+fill_2d_HL([], _, _, _, _, _, _, []).
+fill_2d_HL([Row|Rest], X, Y, GoalX, GoalY, GoalColor, Board, [Row1|Rest1]) :-
+    fill_1d_HL(Row, X, Y, GoalX, GoalY, GoalColor, Board, Row1),
+    X1 is X + 1,
+    fill_2d_HL(Rest, X1, Y, GoalX, GoalY, GoalColor, Board, Rest1).
 
 % x, y is the nood i want to go to Ind is the path form start to the nood from it i will move 
 % to the nood x, y. List has [[visited path]] as each visitedpath is from the start to a nood and the list with total costs
