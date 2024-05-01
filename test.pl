@@ -130,6 +130,7 @@ update([[X, Y]|T], Ind, Visited, UpVisited, Heuristic, Ec, ExactCost, NExactCost
     NEc is Ec + 1, append(ExactCost, [NEc], NExactCost),
     nth0(X, Heuristic, HL),nth0(Y, HL, HV), NEst is NEc + HV,
            append(EstimatedTCost, [NEst], NEstimatedTCost),
+    write('Visited after appending  '), write(UpVisited),nl,
     update(T, Ind, UpVisited, _, Heuristic, Ec, NExactCost, _, NEstimatedTCost, _).
     
 
@@ -148,9 +149,12 @@ aStar(Ex, Ey, Visited, ExactCost, EstimatedTCost, Color, Heuristic, Board, N, M)
     
     findMinIndex(EstimatedTCost, Ind, _), nth0(Ind, ExactCost, Ec),
     nth0(Ind, Visited, LVisited), last(LVisited, [SX, SY]),
-    getallchild(SX,SY,[],Moves, N, M, Color, Board,LVisited),
-    update(Moves, Ind, Visited, NVisited, Heuristic, Ec, ExactCost, NExactCost, EstimatedTCost, NEstimatedTCost),
     
+    getallchild(SX,SY,[],Moves, N, M, Color, Board,LVisited),
+    write('Moves  '), write(Moves),nl,
+    
+    update(Moves, Ind, Visited, NVisited, Heuristic, Ec, ExactCost, NExactCost, EstimatedTCost, NEstimatedTCost),
+    write('Visited after being expanded  '), write(NVisited),nl,
     remove_at(Ind, NEstimatedTCost, NewEstimatedTCost),
     remove_at(Ind, NExactCost, NewExactCost),
     remove_at(Ind, NVisited, NewVisited),
