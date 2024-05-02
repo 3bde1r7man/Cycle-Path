@@ -126,13 +126,15 @@ update([], _, Visited, Visited, _, _, ExactCost, ExactCost, EstimatedTCost, Esti
 update([[X, Y]|T], Ind, Visited, UpVisited, Heuristic, Ec, ExactCost, NExactCost, EstimatedTCost, NEstimatedTCost):-
     nth0(Ind, Visited, LVisited),
     append(LVisited, [[X, Y]], Visited1),
-    append(Visited, [Visited1] , UpVisited),
+    append(Visited, [Visited1], UpdatedVisited),
     NEc is Ec + 1, append(ExactCost, [NEc], NExactCost),
-    nth0(X, Heuristic, HL),nth0(Y, HL, HV), NEst is NEc + HV,
-           append(EstimatedTCost, [NEst], NEstimatedTCost),
-    write('Visited after appending  '), write(UpVisited),nl,
-    update(T, Ind, UpVisited, _, Heuristic, Ec, NExactCost, _, NEstimatedTCost, _).
-    
+    nth0(X, Heuristic, HL),
+    nth0(Y, HL, HV), 
+    NEst is NEc + HV,
+    append(EstimatedTCost, [NEst], NEstimatedTCost),
+    write('Visited after appending  '), write(UpdatedVisited), nl,
+    update(T, Ind, UpdatedVisited, UpVisited, Heuristic, Ec, NExactCost, _, NEstimatedTCost, _).
+
 
 % ExactCost has actual total cost from start to the last nood in the visited list
 aStar(Ex, Ey, Visited, ExactCost, EstimatedTCost, Color, Heuristic, Board, N, M) :- 
@@ -172,10 +174,24 @@ aStar(1,4,[[[0,0]]],[0],[5],r, [[-1,4,-1,-1,2,-1],[4,3,2,1,0,1],[-1,-1,-1,2,1,-1
 */
 
 
+% b(B), hurestic(H), aStar(1,4,[[[0,1]]],[0],[4],r, H, B, 3, 6).
 
 
+hurestic(
+    [
+        [-1,4,3,2,1,2],
+        [4,3,2,1,0,1],
+        [-1,-1,-1,2,1,-1]
+    ]
+).
 
-
+b(
+    [
+        [b,r,r,r,r,r],
+        [r,r,r,r,r,r],
+        [b,b,b,r,r,b]
+    ]
+).
 
 
 
