@@ -16,6 +16,13 @@ board1([
     [blue, red, blue, yellow]
 ]).
 
+board2([
+    [red, red, yellow, yellow],
+    [red, blue, red, red],
+    [red, red, red, yellow],
+    [blue, red, blue, yellow]
+]).
+
 % moves 
 move(0, 1). % right
 move(-1, 0). % up
@@ -127,18 +134,17 @@ update([[X, Y]|T], Ind, Visited, UpVisited, Heuristic, Ec, ExactCost, NExactCost
     nth0(Ind, Visited, LVisited),
     append(LVisited, [[X, Y]], Visited1),
     append(Visited, [Visited1], UpdatedVisited),
-    NEc is Ec + 1, append(ExactCost, [NEc], NExactCost),
+    NEc is Ec + 1, append(ExactCost, [NEc], UpdatedNExactCost),
     nth0(X, Heuristic, HL),
     nth0(Y, HL, HV), 
     NEst is NEc + HV,
-    append(EstimatedTCost, [NEst], NEstimatedTCost),
-    write('Visited after appending  '), write(UpdatedVisited), nl,
-    update(T, Ind, UpdatedVisited, UpVisited, Heuristic, Ec, NExactCost, _, NEstimatedTCost, _).
+    append(EstimatedTCost, [NEst], UpdatedNEstimatedTCost),
+    update(T, Ind, UpdatedVisited, UpVisited, Heuristic, Ec, UpdatedNExactCost, NExactCost, UpdatedNEstimatedTCost, NEstimatedTCost).
 
 
 % ExactCost has actual total cost from start to the last nood in the visited list
 aStar(Ex, Ey, Visited, ExactCost, EstimatedTCost, Color, Heuristic, Board, N, M) :- 
-   % if Color, starting point color, and goal color are
+    % if Color, starting point color, and goal color are
     length(Visited, L), L =:= 1, nth0(0, Visited, LVisited), length(LVisited, L1), L1 =:= 1, last(LVisited, [SX, SY]),
     (\+getColor(SX, SY, Color, Board); \+getColor(Ex, Ey, Color, Board)),
     write('The starting point, goal, and color you provided do not match'),!;
@@ -153,15 +159,12 @@ aStar(Ex, Ey, Visited, ExactCost, EstimatedTCost, Color, Heuristic, Board, N, M)
     nth0(Ind, Visited, LVisited), last(LVisited, [SX, SY]),
     
     getallchild(SX,SY,[],Moves, N, M, Color, Board,LVisited),
-    write('Moves  '), write(Moves),nl,
     
     update(Moves, Ind, Visited, NVisited, Heuristic, Ec, ExactCost, NExactCost, EstimatedTCost, NEstimatedTCost),
-    write('Visited after being expanded  '), write(NVisited),nl,
     remove_at(Ind, NEstimatedTCost, NewEstimatedTCost),
     remove_at(Ind, NExactCost, NewExactCost),
     remove_at(Ind, NVisited, NewVisited),
-   
-    aStar(Ex, Ey, NewVisited, NewExactCost, NewEstimatedTCost, Color, Heuristic, Board, N, M).
+    aStar(Ex, Ey, NewVisited, NewExactCost, NewEstimatedTCost, Color, Heuristic, Board, N, M),!.
 
 
 
@@ -170,7 +173,6 @@ aStar(Ex, Ey, Visited, ExactCost, EstimatedTCost, Color, Heuristic, Board, N, M)
 dfs(2,0,[[2,0]],blue,[[yellow, yellow, yellow, red], [blue, yellow, blue, yellow],[blue, blue, blue, yellow],[blue, blue, blue, yellow]],4,4).
 aStar(1,5,[[[0,1]]],[0],[5],r, [[-1,5,-1,-1,2,-1],[5,4,3,2,1,0],[-1,-1,-1,3,2,-1]], [[b,r,b,b,r,b],[r,r,r,r,r,r],[b,b,b,r,r,b]], 3, 6)
 aStar(1,4,[[[0,0]]],[0],[5],r, [[-1,4,-1,-1,2,-1],[4,3,2,1,0,1],[-1,-1,-1,2,1,-1]], [[b,r,b,b,r,b],[r,r,r,r,r,r],[b,b,b,r,r,b]], 3, 6)
-   
 */
 
 
@@ -195,4 +197,25 @@ b(
 
 
 
+astar:-
+    board2(Board),
+    length(Board, N), % number of rows
+    Board = [Row|_], length(Row, M), % number of columns
+    getColor(1, 3, Color, Board),
+    fill_2d_HL(Board, 0, 0, 1, 3, Color, Board, Heuristic),
+    aStar(1, 3, [[[0, 0]]], [0], [4], Color, Heuristic, Board, N, M),
+    !.
 
+
+
+dfs :-
+    board0(Board),
+    length(Board, N), % number of rows
+    Board = [Row|_], length(Row, M), % number of columns
+    (   between(0, N, X), % for each cell
+        between(0, M, Y), 
+        dfs(X, Y, [[X, Y]], _, Board, N, M) -> 
+        Found = true
+    ;   Found = false
+    ),
+    (Found -> ! ; write('No cycles found'), nl), !.
