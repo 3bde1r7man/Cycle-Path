@@ -23,6 +23,12 @@ board2([
     [blue, red, blue, yellow]
 ]).
 
+board3([
+    [blue, red, red, red, red, red],
+    [red, red, red, red, red, red],
+    [blue, blue, blue, red, red, blue]
+]).
+
 % moves 
 move(0, 1). % right
 move(-1, 0). % up
@@ -72,6 +78,18 @@ dfs(X, Y, Visited, Color, Board, N, M) :-
     append(Visited, [[X2, Y2]], Visited1),
     dfs(X2, Y2, Visited1, Color, Board, N, M).
 
+
+dfs(Board, N, M) :- 
+    (   between(0, N, X), % for each cell
+        between(0, M, Y), 
+        dfs(X, Y, [[X, Y]], _, Board, N, M) -> 
+        Found = true
+    ;   Found = false
+    ),
+    (Found -> ! ; write('No cycles found'), nl), !.
+
+
+% ------------------------------------------------------
 
 % moves 
 moveA([0, 1]). % right
@@ -149,12 +167,13 @@ update([[X, Y]|T], Ind, Visited, UpVisited, Heuristic, Ec, ExactCost, NExactCost
 aStar(Ex, Ey, Visited, ExactCost, EstimatedTCost, Color, Heuristic, Board, N, M) :- 
     % if Color, starting point color, and goal color are
     length(Visited, L), L =:= 1, nth0(0, Visited, LVisited), length(LVisited, L1), L1 =:= 1, last(LVisited, [SX, SY]),
-    (   (\+getColor(SX, SY, Color, Board); \+getColor(Ex, Ey, Color, Board)),
+    ((\+getColor(SX, SY, Color, Board); \+getColor(Ex, Ey, Color, Board)),
     write('The starting point, goal, and color you provided do not match'),!;
-    (length(EstimatedTCost, L2), L2 < 1, nth0(SX, Heuristic, HL), nth0(SY, HL, HV),
+    (
+        length(EstimatedTCost, L2), L2 < 1, nth0(SX, Heuristic, HL), nth0(SY, HL, HV),
         append(EstimatedTCost, [HV], UpdatedNEstimatedTCost), append(ExactCost, [0], UpdatedNExactCost),
-       
-    aStar(Ex, Ey, Visited, UpdatedNExactCost, UpdatedNEstimatedTCost, Color, Heuristic, Board, N, M)));
+        aStar(Ex, Ey, Visited, UpdatedNExactCost, UpdatedNEstimatedTCost, Color, Heuristic, Board, N, M)
+    ));
     
     
     length(EstimatedTCost, L), L < 1, write('Your goal can not be reached'),!;
@@ -173,70 +192,23 @@ aStar(Ex, Ey, Visited, ExactCost, EstimatedTCost, Color, Heuristic, Board, N, M)
     remove_at(Ind, NVisited, NewVisited),
     aStar(Ex, Ey, NewVisited, NewExactCost, NewEstimatedTCost, Color, Heuristic, Board, N, M),!.
 
+
 % Takes variables X,Y of the goal, list of pathes, color, board, N, and M then this function calls fill_2d_HL that will create the Heuristic list
-aStarAlgo(Ex, Ey, Visited, Color, Board, N, M) :- 
-    fill_2d_HL(Board,0,0,Ex,Ey,r,Board,Heuristic), 
+aStarAlgo(Ex, Ey, Visited, Board, N, M) :- 
+    getColor(Ex, Ey, Color, Board),
+    fill_2d_HL(Board, 0, 0, Ex, Ey, Color, Board, Heuristic), 
     aStar(Ex, Ey, Visited, _, _, Color, Heuristic, Board, N, M).
- 
 
 
-/** <examples>
- 
-?- aStarAlgo(0,4,[[[0,1]]],r, [[b,r,r,r,r,r],[r,r,r,r,r,r],[b,b,b,r,r,b]], 3, 6). 
-   
- 
-?- aStarAlgo(1,5,[[[0,1]]],r, [[b,r,b,b,r,b],[r,r,r,r,r,r],[b,b,b,r,r,b]], 3, 6).
-?- aStarAlgo(1,4,[[[0,0]]],r, [[b,r,b,b,r,b],[r,r,r,r,r,r],[b,b,b,r,r,b]], 3, 6). 
- 
-?- aStarAlgo(1,4,[[[0,1]]],r,[[b,r,r,r,r,r],[r,r,r,r,r,r],[b,b,b,r,r,b]], 3, 6). 
-dfs(2,0,[[2,0]],blue,[[yellow, yellow, yellow, red], [blue, yellow, blue, yellow],[blue, blue, blue, yellow],[blue, blue, blue, yellow]],4,4).
-?- fill_2d_HL([[b,r,r,r,r,r],[r,r,r,r,r,r],[b,b,b,r,r,b]],0,0,1,4,r,[[b,r,r,r,r,r],[r,r,r,r,r,r],[b,b,b,r,r,b]],H).  
-       
- */
-
-
-% b(B), hurestic(H), aStar(1,4,[[[0,1]]],[0],[4],r, H, B, 3, 6).
-
-
-hurestic(
-    [
-        [-1,4,3,2,1,2],
-        [4,3,2,1,0,1],
-        [-1,-1,-1,2,1,-1]
-    ]
-).
-
-b(
-    [
-        [b,r,r,r,r,r],
-        [r,r,r,r,r,r],
-        [b,b,b,r,r,b]
-    ]
-).
-
-
-
-astar:-
+astar :-
     board2(Board),
     length(Board, N), % number of rows
     Board = [Row|_], length(Row, M), % number of columns
-    getColor(1, 3, Color, Board),
-    fill_2d_HL(Board, 0, 0, 1, 3, Color, Board, Heuristic),
-    aStar(1, 3, [[[0, 0]]], [0], [4], Color, Heuristic, Board, N, M),
-    !.
-
+    aStarAlgo(1, 3, [[[0, 0]]], Board, N, M).
 
 
 dfs :-
     board0(Board),
     length(Board, N), % number of rows
     Board = [Row|_], length(Row, M), % number of columns
-    (   between(0, N, X), % for each cell
-        between(0, M, Y), 
-        dfs(X, Y, [[X, Y]], _, Board, N, M) -> 
-        Found = true
-    ;   Found = false
-    ),
-    (Found -> ! ; write('No cycles found'), nl), !.
-
-
+    dfs(Board, N, M).
