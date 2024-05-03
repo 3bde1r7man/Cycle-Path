@@ -96,11 +96,12 @@ fill_2d_HL([Row|Rest], X, Y, GoalX, GoalY, GoalColor, Board, [Row1|Rest1]) :-
     X1 is X + 1,
     fill_2d_HL(Rest, X1, Y, GoalX, GoalY, GoalColor, Board, Rest1).
 
-
-minV([], V, V). % Base case: when the list is empty, V is unified with the accumulator S
+% Base case: when the list is empty, V is unified with the accumulator S
+minV([], V, V). 
 minV([H|Tail], S, V) :-
     S > H, minV(Tail, H, V); minV(Tail, S, V). % If the head H is smaller than S, update S with H and continue recursively
 
+% Find index of minimum element in the given list
 findMinIndex([H|T], Ind, V) :-
     minV(T, H, V),
     nth0(Ind, [H|T], V),!. % Find the index of the minimum value V in the List
@@ -112,9 +113,11 @@ end(LX, LY, Ex, Ey, Visited, Cost, Color) :-
     write('Path: '), write(Visited), write(' TotalCost: '), write(Cost), write(' Color: '), write(Color), nl, 
     !.
 
+%Takes index and list then remove the element which is in the given index and put the final list in Result list
 remove_at(Index, List, Result) :-
     nth0(Index, List, Element),
     select(Element, List, Result).
+
 
 getallchild(X,Y, Open, Moves, N, M, Color, Board,  Visited):-
     findall(Temp, moveA(Temp), List),
@@ -146,8 +149,12 @@ update([[X, Y]|T], Ind, Visited, UpVisited, Heuristic, Ec, ExactCost, NExactCost
 aStar(Ex, Ey, Visited, ExactCost, EstimatedTCost, Color, Heuristic, Board, N, M) :- 
     % if Color, starting point color, and goal color are
     length(Visited, L), L =:= 1, nth0(0, Visited, LVisited), length(LVisited, L1), L1 =:= 1, last(LVisited, [SX, SY]),
-    (\+getColor(SX, SY, Color, Board); \+getColor(Ex, Ey, Color, Board)),
+    (   (\+getColor(SX, SY, Color, Board); \+getColor(Ex, Ey, Color, Board)),
     write('The starting point, goal, and color you provided do not match'),!;
+    (length(EstimatedTCost, L2), L2 < 1, nth0(SX, Heuristic, HL), nth0(SY, HL, HV),
+        append(EstimatedTCost, [HV], UpdatedNEstimatedTCost), append(ExactCost, [0], UpdatedNExactCost),
+       
+    aStar(Ex, Ey, Visited, UpdatedNExactCost, UpdatedNEstimatedTCost, Color, Heuristic, Board, N, M)));
     
     
     length(EstimatedTCost, L), L < 1, write('Your goal can not be reached'),!;
@@ -166,14 +173,26 @@ aStar(Ex, Ey, Visited, ExactCost, EstimatedTCost, Color, Heuristic, Board, N, M)
     remove_at(Ind, NVisited, NewVisited),
     aStar(Ex, Ey, NewVisited, NewExactCost, NewEstimatedTCost, Color, Heuristic, Board, N, M),!.
 
-
+% Takes variables X,Y of the goal, list of pathes, color, board, N, and M then this function calls fill_2d_HL that will create the Heuristic list
+aStarAlgo(Ex, Ey, Visited, Color, Board, N, M) :- 
+    fill_2d_HL(Board,0,0,Ex,Ey,r,Board,Heuristic), 
+    aStar(Ex, Ey, Visited, _, _, Color, Heuristic, Board, N, M).
+ 
 
 
 /** <examples>
+ 
+?- aStarAlgo(0,4,[[[0,1]]],r, [[b,r,r,r,r,r],[r,r,r,r,r,r],[b,b,b,r,r,b]], 3, 6). 
+   
+ 
+?- aStarAlgo(1,5,[[[0,1]]],r, [[b,r,b,b,r,b],[r,r,r,r,r,r],[b,b,b,r,r,b]], 3, 6).
+?- aStarAlgo(1,4,[[[0,0]]],r, [[b,r,b,b,r,b],[r,r,r,r,r,r],[b,b,b,r,r,b]], 3, 6). 
+ 
+?- aStarAlgo(1,4,[[[0,1]]],r,[[b,r,r,r,r,r],[r,r,r,r,r,r],[b,b,b,r,r,b]], 3, 6). 
 dfs(2,0,[[2,0]],blue,[[yellow, yellow, yellow, red], [blue, yellow, blue, yellow],[blue, blue, blue, yellow],[blue, blue, blue, yellow]],4,4).
-aStar(1,5,[[[0,1]]],[0],[5],r, [[-1,5,-1,-1,2,-1],[5,4,3,2,1,0],[-1,-1,-1,3,2,-1]], [[b,r,b,b,r,b],[r,r,r,r,r,r],[b,b,b,r,r,b]], 3, 6)
-aStar(1,4,[[[0,0]]],[0],[5],r, [[-1,4,-1,-1,2,-1],[4,3,2,1,0,1],[-1,-1,-1,2,1,-1]], [[b,r,b,b,r,b],[r,r,r,r,r,r],[b,b,b,r,r,b]], 3, 6)
-*/
+?- fill_2d_HL([[b,r,r,r,r,r],[r,r,r,r,r,r],[b,b,b,r,r,b]],0,0,1,4,r,[[b,r,r,r,r,r],[r,r,r,r,r,r],[b,b,b,r,r,b]],H).  
+       
+ */
 
 
 % b(B), hurestic(H), aStar(1,4,[[[0,1]]],[0],[4],r, H, B, 3, 6).
@@ -219,3 +238,5 @@ dfs :-
     ;   Found = false
     ),
     (Found -> ! ; write('No cycles found'), nl), !.
+
+
