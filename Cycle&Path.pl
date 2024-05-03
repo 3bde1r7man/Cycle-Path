@@ -197,7 +197,7 @@ aStar(Ex, Ey, Visited, ExactCost, EstimatedTCost, Color, Heuristic, Board, N, M)
 aStarAlgo(Ex, Ey, Visited, Board, N, M) :- 
     getColor(Ex, Ey, Color, Board),
     fill_2d_HL(Board, 0, 0, Ex, Ey, Color, Board, Heuristic), 
-    aStar(Ex, Ey, Visited, _, _, Color, Heuristic, Board, N, M).
+    aStar(Ex, Ey, Visited, _, _, Color, Heuristic, Board, N, M), !.
 
 
 astar :-
